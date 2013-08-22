@@ -154,8 +154,8 @@ class WtiApi
         $response = json_decode(curl_exec($ch));
         curl_close($ch);
 
-        if ($response['error']) {
-            $this->lastError = $response['error'];
+        if ($response->error) {
+            $this->lastError = $response->error;
             return false;
         } else {
             $this->lastError = null;
