@@ -1,18 +1,21 @@
 <?php
 namespace LinguaLeo\wti;
 
-class WtiApi {
+class WtiApi
+{
 
     private $apiKey;
-    private $info;
+    public $info;
     private $lastError;
 
-    public function __construct($apiKey) {
+    public function __construct($apiKey)
+    {
         $this->apiKey = $apiKey;
         $this->init();
     }
 
-    private function init () {
+    private function init()
+    {
         $projectInfo = $this->getProjectInfo();
         if (!$projectInfo) {
             throw new \Exception('Request project info failed');
@@ -20,26 +23,29 @@ class WtiApi {
         $this->info = $projectInfo;
     }
 
-    public function getProjectInfo () {
+    public function getProjectInfo()
+    {
         $projectInfo = $this->makeRequest(array(), null, 'GET');
 
         if ($projectInfo) {
             return $projectInfo['project'];
-        }
-        else {
+        } else {
             return false;
         }
     }
 
-    public function getProjectStatistics($params = array()) {
+    public function getProjectStatistics($params = array())
+    {
         return $this->makeRequest($params, 'stats', 'GET');
     }
 
-    public function getTopTranslators($params = array()) {
+    public function getTopTranslators($params = array())
+    {
         return $this->makeRequest($params, 'top_translators', 'GET');
     }
 
-    public function addUser($email, $locale, $proofread, $role = 'translator') {
+    public function addUser($email, $locale, $proofread, $role = 'translator')
+    {
         $params = array(
             "email" => $email,
             "role" => $role,
@@ -50,7 +56,8 @@ class WtiApi {
         return $this->makeRequest($params, 'users');
     }
 
-    public function addLocale($localeCode) {
+    public function addLocale($localeCode)
+    {
         $params = array(
             "id" => $localeCode
         );
@@ -58,7 +65,8 @@ class WtiApi {
         return $this->makeRequest($params, 'locales');
     }
 
-    public function addString($key, $value, $filename) {
+    public function addString($key, $value, $filename)
+    {
         if (!$filename) {
             throw new \Exception('Filename should be provided');
         }
@@ -67,10 +75,10 @@ class WtiApi {
             'key' => $key,
             'type' => 'String',
             'status' => 'Current',
-            'file' => array (
+            'file' => array(
                 'file_name' => $filename
             ),
-            'translations' => array (
+            'translations' => array(
                 array(
                     'locale' => $this->info->source_locale->code,
                     'text' => $value
@@ -87,7 +95,8 @@ class WtiApi {
      *                  filter: can be one of membership, invitation or blank. Defaults to blank if left blank.
      *                  ]
      */
-    public function listUsers ($params = array()) {
+    public function listUsers($params = array())
+    {
         return $this->makeRequest($params, 'users', 'GET');
     }
 
@@ -98,16 +107,19 @@ class WtiApi {
      *
      * @url https://webtranslateit.com/en/docs/api/user#approve-invitation
      */
-    public function approveInvitation ($invitation_id, $params = array()) {
+    public function approveInvitation($invitation_id, $params = array())
+    {
         return $this->makeRequest($params, 'users/' . $invitation_id, 'PUT');
     }
 
 
-    public function getLastError() {
+    public function getLastError()
+    {
         return $this->lastError;
     }
 
-    private function _getParams ($params = array()) {
+    private function _getParams($params = array())
+    {
         $params_array = array();
         foreach ($params as $paramName => $paramValue) {
             if (!is_null($paramValue)) {
@@ -117,7 +129,8 @@ class WtiApi {
         return implode('&', $params_array);
     }
 
-    private function makeRequest ($params = array(), $endpoint = null, $method = 'POST') {
+    private function makeRequest($params = array(), $endpoint = null, $method = 'POST')
+    {
 
         $requestURL = "https://webtranslateit.com/api/projects/" . $this->apiKey;
 
@@ -129,8 +142,7 @@ class WtiApi {
 
         if ($method == 'GET') {
             $requestURL .= '.json?' . $this->_getParams($params);
-        }
-        else {
+        } else {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
         }
 
@@ -145,8 +157,7 @@ class WtiApi {
         if ($response['error']) {
             $this->lastError = $response['error'];
             return false;
-        }
-        else {
+        } else {
             $this->lastError = null;
             return $response;
         }
