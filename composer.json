@@ -1,0 +1,14 @@
+{
+    "name": "lingualeo/wti-api",
+    "description": "Some methods to work with WebTranslateIt",
+    "authors": [
+        {
+            "name": "Igor Lyubimov",
+            "email": "igor@lingualeo.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+
+    }
+}
