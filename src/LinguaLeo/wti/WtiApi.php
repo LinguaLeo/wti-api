@@ -8,10 +8,12 @@ class WtiApi
     public $info;
     private $lastError;
 
-    public function __construct($apiKey)
+    public function __construct($apiKey, $initProjectInfo = true)
     {
         $this->apiKey = $apiKey;
-        $this->init();
+        if ($initProjectInfo) {
+            $this->init();
+        }
     }
 
     private function init()
@@ -28,7 +30,7 @@ class WtiApi
         $projectInfo = $this->makeRequest(array(), null, 'GET');
 
         if ($projectInfo) {
-            return $projectInfo['project'];
+            return $projectInfo->project;
         } else {
             return false;
         }
@@ -109,7 +111,18 @@ class WtiApi
      */
     public function approveInvitation($invitation_id, $params = array())
     {
-        return $this->makeRequest($params, 'users/' . $invitation_id, 'PUT');
+        return $this->makeRequest($params, 'users/' . $invitation_id . '/approve', 'PUT');
+    }
+
+    /**
+     * @param $invitation_id
+     * @return bool|mixed
+     *
+     * @url https://webtranslateit.com/en/docs/api/user#remove-invitation
+     */
+    public function removeInvitation($invitation_id)
+    {
+        return $this->makeRequest(null, 'users/' . $invitation_id, 'DELETE');
     }
 
 
@@ -141,7 +154,11 @@ class WtiApi
         $ch = curl_init();
 
         if ($method == 'GET') {
-            $requestURL .= '.json?' . $this->_getParams($params);
+            $requestURL .= '.json';
+
+            if ($urlParams = $this->_getParams($params)) {
+                $requestURL .= '?' . $urlParams;
+            }
         } else {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
         }
@@ -151,11 +168,13 @@ class WtiApi
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        $response = json_decode(curl_exec($ch));
+
+        $result = curl_exec($ch);
+        $response = json_decode($result);
         curl_close($ch);
 
-        if ($response->error) {
-            $this->lastError = $response->error;
+        if ($this->lastError) {
+            $this->lastError = $this->lastError;
             return false;
         } else {
             $this->lastError = null;
