@@ -6,7 +6,9 @@ class WtiApi
 
     public $info;
     private $apiKey;
-    private $lastError;
+
+    /** @var WtiRequest */
+    private $request;
 
     public function __construct($apiKey, $initProjectInfo = true)
     {
@@ -18,34 +20,62 @@ class WtiApi
 
     private function init()
     {
-        $projectInfo = $this->getProjectInfo();
-        if (!$projectInfo) {
-            throw new \Exception('Request project info failed');
+        $this->info = $this->getProjectInfo();
+        if (!$this->info) {
+            throw new \Exception('Request for project info failed.');
         }
-        $this->info = $projectInfo;
     }
 
+    /**
+     * @return mixed
+     */
     public function getProjectInfo()
     {
-        $projectInfo = $this->makeRequest(array(), null, 'GET');
-
-        if ($projectInfo) {
-            return $projectInfo->project;
-        } else {
-            return false;
-        }
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::GET)
+            ->build();
+        $this->request->run();
+        $projectInfo = $this->request->getResult();
+        return $projectInfo ? $projectInfo->project : null;
     }
 
-    public function getProjectStatistics($params = array())
+    /**
+     * @param array $params
+     * @return mixed|null
+     */
+    public function getProjectStatistics($params = [])
     {
-        return $this->makeRequest($params, 'stats', 'GET');
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::GET)
+            ->setParams($params)
+            ->setEndpoint('stats')
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
-    public function getTopTranslators($params = array())
+    /**
+     * @param array $params
+     * @return mixed|null]
+     */
+    public function getTopTranslators($params = [])
     {
-        return $this->makeRequest($params, 'top_translators', 'GET');
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::GET)
+            ->setParams($params)
+            ->setEndpoint('top_translators')
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
+    /**
+     * @param $email
+     * @param $locale
+     * @param $proofread
+     * @param string $role
+     * @return mixed|null
+     */
     public function addUser($email, $locale, $proofread, $role = 'translator')
     {
         $params = array(
@@ -54,8 +84,13 @@ class WtiApi
             "proofreader" => $proofread,
             "locale" => $locale
         );
-
-        return $this->makeRequest($params, 'users');
+        $this->request = $this->builder()
+            ->setParams($params)
+            ->setEndpoint('users')
+            ->setMethod(RequestMethod::POST)
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
     /**
@@ -67,8 +102,13 @@ class WtiApi
         $params = array(
             "id" => $localeCode
         );
-
-        return $this->makeRequest($params, 'locales');
+        $this->request = $this->builder()
+            ->setParams($params)
+            ->setEndpoint('locales')
+            ->setMethod(RequestMethod::POST)
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
     /**
@@ -83,7 +123,6 @@ class WtiApi
         if (!$filename) {
             throw new \Exception('Filename should be provided');
         }
-
         $params = array(
             'key' => $key,
             'type' => 'String',
@@ -98,22 +137,34 @@ class WtiApi
                 )
             )
         );
-
-        return $this->makeRequest($params, 'strings');
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::POST)
+            ->setEndpoint('strings')
+            ->setParams($params)
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
     /**
      * @param $name
-     * @param $content
-     * @return bool|mixed|null
+     * @param $filePath
+     * @return mixed
      */
-    public function createFile($name, $content)
+    public function createFile($name, $filePath)
     {
-        $options = [
-            'file' => $content,
+        $params = [
+            'file' => '@' . $filePath,
             'name' => $name,
         ];
-        return $this->makeRequest($options, 'files');
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::POST)
+            ->setParams($params)
+            ->setJsonEncodeParams(false)
+            ->setEndpoint('files')
+            ->build();
+        $this->request->run();
+        return $this->request->getRawResult();
     }
 
     /**
@@ -121,22 +172,35 @@ class WtiApi
      *                  role: can be blank, or one of translator, manager, client. Defaults to blank if left blank.
      *                  filter: can be one of membership, invitation or blank. Defaults to blank if left blank.
      *                  ]
+     * @return mixed|null
      */
-    public function listUsers($params = array())
+    public function listUsers($params = [])
     {
-        return $this->makeRequest($params, 'users', 'GET');
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::GET)
+            ->setParams($params)
+            ->setEndpoint('users')
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
     /**
-     * @param $invitation_id
+     * @param $invitationId
      * @param array $params
      * @return bool|mixed
      *
      * @url https://webtranslateit.com/en/docs/api/user#approve-invitation
      */
-    public function approveInvitation($invitation_id, $params = array())
+    public function approveInvitation($invitationId, $params = [])
     {
-        return $this->makeRequest($params, 'users/' . $invitation_id . '/approve', 'PUT');
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::PUT)
+            ->setParams($params)
+            ->setEndpoint("users/{$invitationId}/approve")
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
     /**
@@ -147,7 +211,12 @@ class WtiApi
      */
     public function removeInvitation($invitation_id)
     {
-        return $this->makeRequest(null, 'users/' . $invitation_id, 'DELETE');
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::DELETE)
+            ->setEndpoint('users/' . $invitation_id)
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
     /**
@@ -155,62 +224,15 @@ class WtiApi
      */
     public function getLastError()
     {
-        return $this->lastError;
+        return $this->request->getError();
     }
 
     /**
-     * @param array $params
-     * @return string
+     * @return WtiRequestBuilder
      */
-    private function getParams($params = array())
+    private function builder()
     {
-        $paramsArray = [];
-        foreach ($params as $paramName => $paramValue) {
-            if (!is_null($paramValue)) {
-                $paramsArray[] = urlencode($paramName) . '=' . urlencode($paramValue);
-            }
-        }
-        return implode('&', $paramsArray);
+        return new WtiRequestBuilder($this->apiKey);
     }
 
-    /**
-     * @param array $params
-     * @param null $endpoint
-     * @param string $method
-     * @return bool|mixed|null
-     */
-    private function makeRequest($params = array(), $endpoint = null, $method = 'POST')
-    {
-        $requestURL = "https://webtranslateit.com/api/projects/" . $this->apiKey;
-
-        if ($endpoint) {
-            $requestURL .= "/" . $endpoint;
-        }
-
-        $ch = curl_init();
-        if ($method == 'GET') {
-            $requestURL .= '.json';
-            if ($urlParams = $this->getParams($params)) {
-                $requestURL .= '?' . $urlParams;
-            }
-        } else {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-        }
-
-        curl_setopt($ch, CURLOPT_URL, $requestURL);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-
-        $result = curl_exec($ch);
-        if ($result === false) {
-            $this->lastError = curl_error($ch);
-            $response = null;
-        } else {
-            $this->lastError = null;
-            $response = json_decode($result);
-        }
-        curl_close($ch);
-        return $this->lastError ? false : $response;
-    }
 }
