@@ -4,8 +4,8 @@ namespace LinguaLeo\wti;
 class WtiApi
 {
 
-    private $apiKey;
     public $info;
+    private $apiKey;
     private $lastError;
 
     public function __construct($apiKey, $initProjectInfo = true)
@@ -58,6 +58,10 @@ class WtiApi
         return $this->makeRequest($params, 'users');
     }
 
+    /**
+     * @param $localeCode
+     * @return bool|mixed|null
+     */
     public function addLocale($localeCode)
     {
         $params = array(
@@ -67,6 +71,13 @@ class WtiApi
         return $this->makeRequest($params, 'locales');
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @param $filename
+     * @return bool|mixed|null
+     * @throws \Exception
+     */
     public function addString($key, $value, $filename)
     {
         if (!$filename) {
@@ -89,6 +100,20 @@ class WtiApi
         );
 
         return $this->makeRequest($params, 'strings');
+    }
+
+    /**
+     * @param $name
+     * @param $content
+     * @return bool|mixed|null
+     */
+    public function createFile($name, $content)
+    {
+        $options = [
+            'file' => $content,
+            'name' => $name,
+        ];
+        return $this->makeRequest($options, 'files');
     }
 
     /**
@@ -125,26 +150,37 @@ class WtiApi
         return $this->makeRequest(null, 'users/' . $invitation_id, 'DELETE');
     }
 
-
+    /**
+     * @return mixed
+     */
     public function getLastError()
     {
         return $this->lastError;
     }
 
-    private function _getParams($params = array())
+    /**
+     * @param array $params
+     * @return string
+     */
+    private function getParams($params = array())
     {
-        $params_array = array();
+        $paramsArray = [];
         foreach ($params as $paramName => $paramValue) {
             if (!is_null($paramValue)) {
-                $params_array[] = urlencode($paramName) . '=' . urlencode($paramValue);
+                $paramsArray[] = urlencode($paramName) . '=' . urlencode($paramValue);
             }
         }
-        return implode('&', $params_array);
+        return implode('&', $paramsArray);
     }
 
+    /**
+     * @param array $params
+     * @param null $endpoint
+     * @param string $method
+     * @return bool|mixed|null
+     */
     private function makeRequest($params = array(), $endpoint = null, $method = 'POST')
     {
-
         $requestURL = "https://webtranslateit.com/api/projects/" . $this->apiKey;
 
         if ($endpoint) {
@@ -152,11 +188,9 @@ class WtiApi
         }
 
         $ch = curl_init();
-
         if ($method == 'GET') {
             $requestURL .= '.json';
-
-            if ($urlParams = $this->_getParams($params)) {
+            if ($urlParams = $this->getParams($params)) {
                 $requestURL .= '?' . $urlParams;
             }
         } else {
@@ -166,19 +200,17 @@ class WtiApi
         curl_setopt($ch, CURLOPT_URL, $requestURL);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 
         $result = curl_exec($ch);
-        $response = json_decode($result);
-        curl_close($ch);
-
-        if ($this->lastError) {
-            $this->lastError = $this->lastError;
-            return false;
+        if ($result === false) {
+            $this->lastError = curl_error($ch);
+            $response = null;
         } else {
             $this->lastError = null;
-            return $response;
+            $response = json_decode($result);
         }
+        curl_close($ch);
+        return $this->lastError ? false : $response;
     }
 }
