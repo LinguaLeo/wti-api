@@ -40,6 +40,32 @@ class WtiApi
     }
 
     /**
+     * @param $key
+     * @param $fileId
+     * @return mixed|null
+     */
+    public function getStringId($key, $fileId)
+    {
+        $params = [
+            'filters' => [
+                'key' => $key,
+                'file' => $fileId
+            ]
+        ];
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::GET)
+            ->setEndpoint('strings')
+            ->setParams($params)
+            ->build();
+        $this->request->run();
+        $result = $this->request->getResult();
+        if (!$result) {
+            return null;
+        }
+        return $result[0]->id;
+    }
+
+    /**
      * @param array $params
      * @return mixed|null
      */
@@ -123,23 +149,43 @@ class WtiApi
         if (!$filename) {
             throw new \Exception('Filename should be provided');
         }
-        $params = array(
+        $params = [
             'key' => $key,
             'type' => 'String',
             'status' => 'Current',
-            'file' => array(
+            'file' => [
                 'file_name' => $filename
-            ),
-            'translations' => array(
-                array(
+            ],
+            'translations' => [
+                [
                     'locale' => $this->info->source_locale->code,
                     'text' => $value
-                )
-            )
-        );
+                ]
+            ]
+        ];
         $this->request = $this->builder()
             ->setMethod(RequestMethod::POST)
             ->setEndpoint('strings')
+            ->setParams($params)
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
+    }
+
+    /**
+     * @param $stringId
+     * @param $locale
+     * @param $value
+     * @return mixed|null
+     */
+    public function addTranslate($stringId, $locale, $value)
+    {
+        $params = [
+            'text' => $value
+        ];
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::POST)
+            ->setEndpoint("strings/{$stringId}/locales/{$locale}/translations")
             ->setParams($params)
             ->build();
         $this->request->run();
