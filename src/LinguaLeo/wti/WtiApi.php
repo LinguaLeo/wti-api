@@ -7,7 +7,7 @@ class WtiApi
     public $info;
     private $apiKey;
 
-    /** @var WtiRequest */
+    /** @var WtiApiRequest */
     private $request;
 
     public function __construct($apiKey, $initProjectInfo = true)

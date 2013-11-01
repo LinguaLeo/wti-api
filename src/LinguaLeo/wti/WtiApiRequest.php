@@ -2,7 +2,7 @@
 
 namespace LinguaLeo\wti;
 
-class WtiRequest
+class WtiApiRequest
 {
 
     private $resource;
@@ -25,6 +25,7 @@ class WtiRequest
 
     public function run()
     {
+        $this->isRequestRunned = true;
         $this->result = curl_exec($this->resource);
         if ($this->result === false) {
             $this->error = curl_error($this->resource);

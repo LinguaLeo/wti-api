@@ -65,7 +65,7 @@ class WtiRequestBuilder
         if ($this->jsonEncodeParams) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         }
-        return new WtiRequest($ch);
+        return new WtiApiRequest($ch);
     }
 
     private function buildUrlParams()
