@@ -168,6 +168,37 @@ class WtiApi
     }
 
     /**
+     * @param $masterId
+     * @param $localeCode
+     * @param $name
+     * @param $filePath
+     * @param bool $merge
+     * @param bool $ignoreMissing
+     * @param bool $minorChanges
+     * @param null $label
+     * @return mixed
+     */
+    public function updateFile($masterId, $localeCode, $name, $filePath, $merge = false, $ignoreMissing = false, $minorChanges = false, $label = null)
+    {
+        $params = [
+            'name' => $name,
+            'merge' => $merge,
+            'ignore_missing' => $ignoreMissing,
+            'minor_changes' => $minorChanges,
+            'label' => $label,
+            'file' => '@' . $filePath
+        ];
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::PUT)
+            ->setParams($params)
+            ->setJsonEncodeParams(false)
+            ->setEndpoint("files/{$masterId}/locales/{$localeCode}")
+            ->build();
+        $this->request->run();
+        return $this->request->getRawResult();
+    }
+
+    /**
      * @param $params [
      *                  role: can be blank, or one of translator, manager, client. Defaults to blank if left blank.
      *                  filter: can be one of membership, invitation or blank. Defaults to blank if left blank.
