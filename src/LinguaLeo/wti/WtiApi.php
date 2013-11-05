@@ -141,10 +141,11 @@ class WtiApi
      * @param $key
      * @param $value
      * @param $filename
-     * @return bool|mixed|null
+     * @param null $label
      * @throws \Exception
+     * @return bool|mixed|null
      */
-    public function addString($key, $value, $filename)
+    public function addString($key, $value, $filename, $label = null)
     {
         if (!$filename) {
             throw new \Exception('Filename should be provided');
@@ -152,6 +153,7 @@ class WtiApi
         $params = [
             'key' => $key,
             'type' => 'String',
+            'labels' => $label,
             'status' => 'Current',
             'file' => [
                 'file_name' => $filename
