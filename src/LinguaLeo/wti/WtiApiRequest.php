@@ -16,13 +16,6 @@ class WtiApiRequest
         $this->resource = $resource;
     }
 
-    public function __destruct()
-    {
-        if ($this->resource !== null) {
-            curl_close($this->resource);
-        }
-    }
-
     public function run()
     {
         $this->isRequestRunned = true;

@@ -11,11 +11,13 @@ class WtiRequestBuilder
     private $endpoint;
     private $method;
     private $params = [];
+    private $resource;
     private $jsonEncodeParams = true;
 
-    public function __construct($apiKey)
+    public function __construct($apiKey, $resource)
     {
         $this->apiKey = $apiKey;
+        $this->resource = $resource;
     }
 
     public function setEndpoint($endpoint)
@@ -44,7 +46,6 @@ class WtiRequestBuilder
 
     public function build()
     {
-        $ch = curl_init();
         $requestUrl = self::API_URL . "/projects/" . $this->apiKey;
         if ($this->endpoint !== null) {
             $requestUrl .= "/" . $this->endpoint;
@@ -56,16 +57,16 @@ class WtiRequestBuilder
             }
         } else {
             $params = $this->jsonEncodeParams ? json_encode($this->params) : $this->params;
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+            curl_setopt($this->resource, CURLOPT_POST, true);
+            curl_setopt($this->resource, CURLOPT_POSTFIELDS, $params);
         }
-        curl_setopt($ch, CURLOPT_URL, $requestUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);
+        curl_setopt($this->resource, CURLOPT_URL, $requestUrl);
+        curl_setopt($this->resource, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->resource, CURLOPT_CUSTOMREQUEST, $this->method);
         if ($this->jsonEncodeParams) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            curl_setopt($this->resource, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         }
-        return new WtiApiRequest($ch);
+        return new WtiApiRequest($this->resource);
     }
 
     private function buildUrlParams()

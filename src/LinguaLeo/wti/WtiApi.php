@@ -5,16 +5,26 @@ class WtiApi
 {
 
     public $info;
+    /** @var string */
     private $apiKey;
-
+    /** @var resource  */
+    private $resource = null;
     /** @var WtiApiRequest */
     private $request;
 
     public function __construct($apiKey, $initProjectInfo = true)
     {
         $this->apiKey = $apiKey;
+        $this->resource = curl_init();
         if ($initProjectInfo) {
             $this->init();
+        }
+    }
+
+    public function __destruct()
+    {
+        if ($this->resource !== null) {
+            curl_close($this->resource);
         }
     }
 
@@ -311,7 +321,7 @@ class WtiApi
      */
     private function builder()
     {
-        return new WtiRequestBuilder($this->apiKey);
+        return new WtiRequestBuilder($this->apiKey, $this->resource);
     }
 
 }
