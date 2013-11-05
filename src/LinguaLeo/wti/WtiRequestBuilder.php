@@ -46,6 +46,28 @@ class WtiRequestBuilder
 
     public function build()
     {
+        if ($this->method !== RequestMethod::GET) {
+            $params = $this->jsonEncodeParams ? json_encode($this->params) : $this->params;
+            curl_setopt($this->resource, CURLOPT_POST, true);
+            curl_setopt($this->resource, CURLOPT_POSTFIELDS, $params);
+        }
+        curl_setopt($this->resource, CURLOPT_URL, $this->buildRequestUrl());
+        curl_setopt($this->resource, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->resource, CURLOPT_CUSTOMREQUEST, $this->method);
+        if ($this->jsonEncodeParams) {
+            curl_setopt($this->resource, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        } else if ($this->method !== RequestMethod::GET) {
+            if (isset($params['file'])) {
+                curl_setopt($this->resource, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+            } else {
+                curl_setopt($this->resource, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+            }
+        }
+        return new WtiApiRequest($this->resource);
+    }
+
+    private function buildRequestUrl()
+    {
         $requestUrl = self::API_URL . "/projects/" . $this->apiKey;
         if ($this->endpoint !== null) {
             $requestUrl .= "/" . $this->endpoint;
@@ -55,18 +77,8 @@ class WtiRequestBuilder
             if ($this->params) {
                 $requestUrl .= "?" . $this->buildUrlParams();
             }
-        } else {
-            $params = $this->jsonEncodeParams ? json_encode($this->params) : $this->params;
-            curl_setopt($this->resource, CURLOPT_POST, true);
-            curl_setopt($this->resource, CURLOPT_POSTFIELDS, $params);
         }
-        curl_setopt($this->resource, CURLOPT_URL, $requestUrl);
-        curl_setopt($this->resource, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($this->resource, CURLOPT_CUSTOMREQUEST, $this->method);
-        if ($this->jsonEncodeParams) {
-            curl_setopt($this->resource, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        }
-        return new WtiApiRequest($this->resource);
+        return $requestUrl;
     }
 
     private function buildUrlParams()
