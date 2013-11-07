@@ -1,4 +1,5 @@
 <?php
+
 namespace LinguaLeo\wti;
 
 class WtiApi
@@ -148,33 +149,40 @@ class WtiApi
     }
 
     /**
-     * @param $key
-     * @param $value
-     * @param $filename
-     * @param null $label
+     * @param string $key
+     * @param string $value
+     * @param string $file can be name of file or it's unique id
+     * @param string $label
+     * @param string $locale
      * @throws \Exception
      * @return bool|mixed|null
      */
-    public function addString($key, $value, $filename, $label = null)
+    public function addString($key, $value, $file, $label = null, $locale = null)
     {
-        if (!$filename) {
-            throw new \Exception('Filename should be provided');
-        }
         $params = [
             'key' => $key,
             'type' => 'String',
             'labels' => $label,
             'status' => 'Current',
-            'file' => [
-                'file_name' => $filename
-            ],
-            'translations' => [
+        ];
+        if (is_numeric($file)) {
+            $params['file'] = [
+                'id' => $file
+            ];
+        } else {
+            $params['file'] = [
+                'file_name' => $file
+            ];
+        }
+        if ($value) {
+            $locale = $locale ? $locale : $this->info->source_locale->code;
+            $params['translations'] = [
                 [
-                    'locale' => $this->info->source_locale->code,
+                    'locale' => $locale,
                     'text' => $value
                 ]
-            ]
-        ];
+            ];
+        }
         $this->request = $this->builder()
             ->setMethod(RequestMethod::POST)
             ->setEndpoint('strings')
@@ -182,6 +190,21 @@ class WtiApi
             ->build();
         $this->request->run();
         return $this->request->getResult();
+    }
+
+    /**
+     * @param $stringId
+     * @return mixed
+     */
+    public function deleteString($stringId)
+    {
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::DELETE)
+            ->setEndpoint('strings/' . $stringId)
+            ->setJsonEncodeParams(false)
+            ->build();
+        $this->request->run();
+        return $this->request->getRawResult();
     }
 
     /**
@@ -220,6 +243,21 @@ class WtiApi
             ->setParams($params)
             ->setJsonEncodeParams(false)
             ->setEndpoint('files')
+            ->build();
+        $this->request->run();
+        return $this->request->getRawResult();
+    }
+
+    /**
+     * @param $fileId
+     * @return mixed
+     */
+    public function deleteFile($fileId)
+    {
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::DELETE)
+            ->setEndpoint('files/' . $fileId)
+            ->setJsonEncodeParams(false)
             ->build();
         $this->request->run();
         return $this->request->getRawResult();

@@ -1,14 +1,13 @@
 <?php
-namespace LinguaLeo\wti\impl;
 
-use LinguaLeo\wti\WtiParser;
+namespace LinguaLeo\wti\Parser;
 
-class PhpTemplateParser extends WtiParser
+class PhpTemplateParser extends Parser
 {
+
     public function replaceStringWithKey($string, $key)
     {
-        $this->content = str_replace('@' . $string . '@', $this->getKeyTemplate($key), $this->content);
-
+        $this->content = str_replace("@{$string}@", $this->getKeyTemplate($key), $this->content);
         return $this;
     }
 
@@ -19,7 +18,6 @@ class PhpTemplateParser extends WtiParser
             $this->content,
             $out
         );
-
         return $out[1];
     }
 
@@ -32,4 +30,5 @@ class PhpTemplateParser extends WtiParser
     {
         return "<?php echo __('$key', null, '" . pathinfo($this->langFilename, PATHINFO_FILENAME) . "'); ?>";
     }
+
 }

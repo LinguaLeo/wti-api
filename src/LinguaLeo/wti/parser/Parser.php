@@ -1,14 +1,15 @@
 <?php
-namespace LinguaLeo\wti;
 
-abstract class WtiParser
+namespace LinguaLeo\wti\Parser;
+
+abstract class Parser
 {
 
     protected $filename;
     protected $langFilename;
     protected $originalContent;
     protected $stringsList;
-    protected $keysList = array();
+    protected $keysList = [];
 
     public function __construct($filename, $langFilename)
     {
@@ -22,14 +23,12 @@ abstract class WtiParser
         if (is_null($this->stringsList)) {
             $this->stringsList = $this->extractStringList();
         }
-
         return $this->stringsList;
     }
 
     public function addKeyForString($string, $key)
     {
         $this->keysList[$string] = $key;
-
         return $this;
     }
 
@@ -43,7 +42,6 @@ abstract class WtiParser
         foreach ($this->getKeysList() as $string => $key) {
             $this->replaceStringWithKey($string, $key);
         }
-
         return $this;
     }
 
@@ -59,11 +57,8 @@ abstract class WtiParser
 
 
     abstract public function extractStringList();
-
     abstract public function replaceStringWithKey($string, $key);
-
     abstract public function getKeyPrefix();
-
     abstract public function getKeyTemplate($key);
 
 }
