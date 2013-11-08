@@ -2,6 +2,8 @@
 
 namespace LinguaLeo\wti;
 
+use LinguaLeo\wti\Exception\WtiApiException;
+
 class WtiApiRequest
 {
 
@@ -39,7 +41,7 @@ class WtiApiRequest
     public function getRawResult()
     {
         if (!$this->isRequestRunned) {
-            throw new \Exception("Request must be performed before getting results.");
+            throw new WtiApiException("Request must be performed before getting results.");
         }
         return $this->result;
     }
@@ -47,7 +49,7 @@ class WtiApiRequest
     public function getResult()
     {
         if (!$this->isRequestRunned) {
-            throw new \Exception("Request must be performed before getting results.");
+            throw new WtiApiException("Request must be performed before getting results.");
         }
         return $this->result ? json_decode($this->result) : null;
     }

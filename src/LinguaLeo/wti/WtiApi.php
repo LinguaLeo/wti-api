@@ -2,6 +2,8 @@
 
 namespace LinguaLeo\wti;
 
+use LinguaLeo\wti\Exception\WtiApiException;
+
 class WtiApi
 {
 
@@ -15,6 +17,9 @@ class WtiApi
 
     public function __construct($apiKey, $initProjectInfo = true)
     {
+        if (!$apiKey) {
+            throw new WtiApiException('Wti API key must be setup before use.');
+        }
         $this->apiKey = $apiKey;
         $this->resource = curl_init();
         if ($initProjectInfo) {
@@ -33,7 +38,7 @@ class WtiApi
     {
         $this->info = $this->getProjectInfo();
         if (!$this->info) {
-            throw new \Exception('Request for project info failed.');
+            throw new WtiApiException('Request for project info failed.');
         }
     }
 
@@ -246,6 +251,25 @@ class WtiApi
             ->build();
         $this->request->run();
         return $this->request->getRawResult();
+    }
+
+    /**
+     * @param int $stringId
+     * @param string $label
+     * @return mixed|null
+     */
+    public function updateStringLabel($stringId, $label)
+    {
+        $params = [
+            'labels' => $label
+        ];
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::PUT)
+            ->setEndpoint('strings/' . $stringId)
+            ->setParams($params)
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
     /**
