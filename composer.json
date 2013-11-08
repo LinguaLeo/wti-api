@@ -1,5 +1,6 @@
 {
     "name": "lingualeo/wti-api",
+    "license": "MIT",
     "description": "PHP Library to work with WebTranslateIt API",
     "authors": [
         {
@@ -13,7 +14,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
-
+        "php": ">=5.4.0"
     },
     "autoload": {
         "psr-0": {
