@@ -46,12 +46,12 @@ class WtiApiRequest
         return $this->result;
     }
 
-    public function getResult()
+    public function getResult($assoc = false)
     {
         if (!$this->isRequestRunned) {
             throw new WtiApiException("Request must be performed before getting results.");
         }
-        return $this->result ? json_decode($this->result) : null;
+        return $this->result ? json_decode($this->result, $assoc) : null;
     }
 
 } 

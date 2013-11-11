@@ -13,6 +13,7 @@ class WtiRequestBuilder
     private $params = [];
     private $resource;
     private $jsonEncodeParams = true;
+    private $isJsonToEndpointAdded = true;
 
     public function __construct($apiKey, $resource)
     {
@@ -41,6 +42,12 @@ class WtiRequestBuilder
     public function setJsonEncodeParams($flag)
     {
         $this->jsonEncodeParams = $flag;
+        return $this;
+    }
+
+    public function setIsJsonToEndpointAdded($flag)
+    {
+        $this->isJsonToEndpointAdded = $flag;
         return $this;
     }
 
@@ -73,7 +80,7 @@ class WtiRequestBuilder
             $requestUrl .= "/" . $this->endpoint;
         }
         if ($this->method === RequestMethod::GET) {
-            $requestUrl .= ".json";
+            $requestUrl .= $this->isJsonToEndpointAdded ? ".json" : "";
             if ($this->params) {
                 $requestUrl .= "?" . $this->buildUrlParams();
             }

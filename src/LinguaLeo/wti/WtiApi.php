@@ -166,7 +166,7 @@ class WtiApi
     {
         $params = [
             'key' => $key,
-            'type' => 'String',
+            'type' => is_array($value) ? 'Array' : 'String',
             'labels' => $label,
             'status' => 'Current',
         ];
@@ -251,6 +251,22 @@ class WtiApi
             ->build();
         $this->request->run();
         return $this->request->getRawResult();
+    }
+
+    /**
+     * @param $fileId
+     * @param $locale
+     * @return mixed|null
+     */
+    public function loadFile($fileId, $locale)
+    {
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::GET)
+            ->setEndpoint("files/{$fileId}/locales/{$locale}")
+            ->setIsJsonToEndpointAdded(false)
+            ->build();
+        $this->request->run();
+        return $this->request->getResult(true);
     }
 
     /**
