@@ -221,16 +221,6 @@ class WtiApi
     }
 
     /**
-     * @param $key
-     * @param $file
-     */
-    public function deleteStringByKey($key, $file)
-    {
-        $stringId = $this->getStringId($key, $file);
-        $this->deleteString($stringId);
-    }
-
-    /**
      * @param $stringId
      * @param $locale
      * @param $value
