@@ -60,7 +60,7 @@ class WtiApi
      * @param $fileId
      * @return mixed|null
      */
-    public function getStringId($key, $fileId)
+    public function getStringsByKey($key, $fileId)
     {
         $params = [
             'filters' => [
@@ -75,10 +75,18 @@ class WtiApi
             ->build();
         $this->request->run();
         $result = $this->request->getResult();
-        if (!$result) {
-            return null;
-        }
-        return $result[0]->id;
+        return $result ? $result : [];
+    }
+
+    /**
+     * @param $key
+     * @param $fileId
+     * @return mixed|null
+     */
+    public function getStringId($key, $fileId)
+    {
+        $result = $this->getStringsByKey($key, $fileId);
+        return $result ? $result[0]->id : null;
     }
 
     /**
@@ -159,14 +167,14 @@ class WtiApi
      * @param string $file can be name of file or it's unique id
      * @param string $label
      * @param string $locale
-     * @throws \Exception
+     * @param string $type
      * @return bool|mixed|null
      */
-    public function addString($key, $value, $file, $label = null, $locale = null)
+    public function addString($key, $value, $file, $label = null, $locale = null, $type = Type::TYPE_STRING)
     {
         $params = [
             'key' => $key,
-            'type' => is_array($value) ? 'Array' : 'String',
+            'type' => $type,
             'labels' => $label,
             'status' => 'Current',
         ];
@@ -213,15 +221,30 @@ class WtiApi
     }
 
     /**
+     * @param $key
+     * @param $file
+     */
+    public function deleteStringByKey($key, $file)
+    {
+        $stringId = $this->getStringId($key, $file);
+        $this->deleteString($stringId);
+    }
+
+    /**
      * @param $stringId
      * @param $locale
      * @param $value
+     * @param string $status
      * @return mixed|null
      */
-    public function addTranslate($stringId, $locale, $value)
+    public function addTranslate($stringId, $locale, $value, $status = Status::UNVERIFIED)
     {
+        if (!$value) {
+            return null;
+        }
         $params = [
-            'text' => $value
+            'text' => $value,
+            'status' => $status,
         ];
         $this->request = $this->builder()
             ->setMethod(RequestMethod::POST)
@@ -251,6 +274,23 @@ class WtiApi
             ->build();
         $this->request->run();
         return $this->request->getRawResult();
+    }
+
+    /**
+     * @param string $filename
+     * @param string $ext
+     * @throws Exception\WtiApiException
+     * @return int
+     */
+    public function createEmptyFile($filename, $ext = 'json')
+    {
+        $path = implode(DIRECTORY_SEPARATOR, [sys_get_temp_dir(), uniqid() . '.' . $ext]);
+        file_put_contents($path, json_encode([], JSON_FORCE_OBJECT));
+        $masterId = (int)$this->createFile($filename, $path);
+        if (!$masterId) {
+            throw new WtiApiException('Cannot create master file with filename' . $filename);
+        }
+        return $masterId;
     }
 
     /**
