@@ -15,6 +15,11 @@ class WtiApi
     /** @var WtiApiRequest */
     private $request;
 
+    /**
+     * @param string $apiKey
+     * @param bool $initProjectInfo
+     * @throws Exception\WtiApiException
+     */
     public function __construct($apiKey, $initProjectInfo = true)
     {
         if (!$apiKey) {
@@ -34,6 +39,9 @@ class WtiApi
         }
     }
 
+    /**
+     * @throws Exception\WtiApiException
+     */
     private function init()
     {
         $this->info = $this->getProjectInfo();
@@ -53,6 +61,23 @@ class WtiApi
         $this->request->run();
         $projectInfo = $this->request->getResult();
         return $projectInfo ? $projectInfo->project : null;
+    }
+
+    /**
+     * @param $masterFileId
+     * @return bool
+     */
+    public function isMasterFileExists($masterFileId)
+    {
+        if (!$this->info) {
+            $this->init();
+        }
+        foreach ($this->info->project_files as $projectFile) {
+            if ($projectFile->id === (int)$masterFileId && $projectFile->master_project_file_id === null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
