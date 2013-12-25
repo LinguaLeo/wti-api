@@ -7,7 +7,8 @@ use LinguaLeo\wti\Exception\WtiApiException;
 class WtiApi
 {
 
-    public $info;
+    /** @var object */
+    private $info;
     /** @var string */
     private $apiKey;
     /** @var resource  */
@@ -27,9 +28,7 @@ class WtiApi
         }
         $this->apiKey = $apiKey;
         $this->resource = curl_init();
-        if ($initProjectInfo) {
-            $this->init();
-        }
+        $this->init($initProjectInfo);
     }
 
     public function __destruct()
@@ -42,10 +41,9 @@ class WtiApi
     /**
      * @throws Exception\WtiApiException
      */
-    private function init()
+    private function init($initProjectInfo)
     {
-        $this->info = $this->getProjectInfo();
-        if (!$this->info) {
+        if ($initProjectInfo && !$this->getProjectInfo()) {
             throw new WtiApiException('Request for project info failed.');
         }
     }
@@ -55,12 +53,19 @@ class WtiApi
      */
     public function getProjectInfo()
     {
+        if ($this->info) {
+            return $this->info;
+        }
         $this->request = $this->builder()
             ->setMethod(RequestMethod::GET)
             ->build();
         $this->request->run();
         $projectInfo = $this->request->getResult();
-        return $projectInfo ? $projectInfo->project : null;
+        if ($projectInfo) {
+            $this->info = $projectInfo;
+            return $this->info;
+        }
+        return null;
     }
 
     /**
@@ -69,10 +74,7 @@ class WtiApi
      */
     public function isMasterFileExists($masterFileId)
     {
-        if (!$this->info) {
-            $this->init();
-        }
-        foreach ($this->info->project_files as $projectFile) {
+        foreach ($this->getProjectInfo()->project_files as $projectFile) {
             if ($projectFile->id === (int)$masterFileId && $projectFile->master_project_file_id === null) {
                 return true;
             }
@@ -213,7 +215,7 @@ class WtiApi
             ];
         }
         if ($value) {
-            $locale = $locale ? $locale : $this->info->source_locale->code;
+            $locale = $locale ? $locale : $this->getProjectInfo()->source_locale->code;
             $params['translations'] = [
                 [
                     'locale' => $locale,
