@@ -62,7 +62,7 @@ class WtiApi
         $this->request->run();
         $projectInfo = $this->request->getResult();
         if ($projectInfo) {
-            $this->info = $projectInfo;
+            $this->info = $projectInfo->project;
             return $this->info;
         }
         return null;
