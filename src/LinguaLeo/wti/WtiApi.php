@@ -346,6 +346,22 @@ class WtiApi
     }
 
     /**
+     * @param int $membershipId
+     * @param array $params
+     * @return mixed|null
+     */
+    public function updateMembership($membershipId, array $params)
+    {
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::PUT)
+            ->setEndpoint('memberships/' . $membershipId)
+            ->setParams($params)
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
+    }
+
+    /**
      * @param $fileId
      * @return mixed
      */
