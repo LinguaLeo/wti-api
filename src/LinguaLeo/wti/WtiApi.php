@@ -177,7 +177,7 @@ class WtiApi
     public function addLocale($localeCode)
     {
         $params = array(
-            "id" => $localeCode
+            'id' => $localeCode
         );
         $this->request = $this->builder()
             ->setParams($params)
@@ -185,7 +185,7 @@ class WtiApi
             ->setMethod(RequestMethod::POST)
             ->build();
         $this->request->run();
-        return $this->request->getResult();
+        return $this->request->getRawResult();
     }
 
     /**
