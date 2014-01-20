@@ -189,6 +189,21 @@ class WtiApi
     }
 
     /**
+     * @param $localeCode
+     * @return mixed
+     */
+    public function deleteLocale($localeCode)
+    {
+        $this->request = $this->builder()
+            ->setEndpoint('locales/' . $localeCode)
+            ->setJsonEncodeParams(false)
+            ->setMethod(RequestMethod::DELETE)
+            ->build();
+        $this->request->run();
+        return $this->request->getRawResult();
+    }
+
+    /**
      * @param string $key
      * @param string $value
      * @param string $file can be name of file or it's unique id
