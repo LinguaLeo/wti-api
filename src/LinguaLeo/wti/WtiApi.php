@@ -91,10 +91,14 @@ class WtiApi
     {
         $params = [
             'filters' => [
-                'key' => $key,
-                'file' => $fileId
+                'key' => $key
             ]
         ];
+        if (is_numeric($fileId)) {
+            $params['filters']['file'] = $fileId;
+        } else {
+            $params['filters']['file_name'] = $fileId;
+        }
         $this->request = $this->builder()
             ->setMethod(RequestMethod::GET)
             ->setEndpoint('strings')
