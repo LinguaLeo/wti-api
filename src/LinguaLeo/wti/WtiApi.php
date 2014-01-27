@@ -75,7 +75,12 @@ class WtiApi
     public function isMasterFileExists($masterFileId)
     {
         foreach ($this->getProjectInfo()->project_files as $projectFile) {
-            if ($projectFile->id === (int)$masterFileId && $projectFile->master_project_file_id === null) {
+            if ($projectFile->master_project_file_id !== null) {
+                continue;
+            }
+            if (is_numeric($masterFileId) && ($projectFile->id === (int)$masterFileId)) {
+                return true;
+            } elseif ($projectFile->name === $masterFileId) {
                 return true;
             }
         }
