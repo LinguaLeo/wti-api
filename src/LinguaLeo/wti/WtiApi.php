@@ -280,8 +280,8 @@ class WtiApi
      */
     public function addTranslate($stringId, $locale, $value, $status = Status::UNVERIFIED)
     {
-        if (!$value) {
-            return null;
+        if ($value === null) {
+            $value = '';
         }
         $params = [
             'text' => $value,
