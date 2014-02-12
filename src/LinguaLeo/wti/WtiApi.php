@@ -318,6 +318,7 @@ class WtiApi
     }
 
     /**
+     * @deprecated
      * @param string $filename
      * @param string $ext
      * @throws Exception\WtiApiException
