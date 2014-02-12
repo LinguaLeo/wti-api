@@ -304,7 +304,7 @@ class WtiApi
     public function createFile($name, $filePath)
     {
         $params = [
-            'file' => '@' . $filePath,
+            'file' => new \CURLFile($filePath, 'application/json', $name),
             'name' => $name,
         ];
         $this->request = $this->builder()
@@ -419,7 +419,7 @@ class WtiApi
             'ignore_missing' => $ignoreMissing,
             'minor_changes' => $minorChanges,
             'label' => $label,
-            'file' => '@' . $filePath
+            'file' => new \CURLFile($filePath, 'application/json', $name)
         ];
         $this->request = $this->builder()
             ->setMethod(RequestMethod::PUT)
