@@ -165,10 +165,10 @@ class WtiApi
     public function addUser($email, $locale, $proofread, $role = 'translator')
     {
         $params = array(
-            "email" => $email,
-            "role" => $role,
-            "proofreader" => $proofread,
-            "locale" => $locale
+            'email' => $email,
+            'role' => $role,
+            'proofreader' => $proofread,
+            'locale' => $locale
         );
         $this->request = $this->builder()
             ->setParams($params)
@@ -299,12 +299,13 @@ class WtiApi
     /**
      * @param $name
      * @param $filePath
+     * @param string $mime
      * @return mixed
      */
-    public function createFile($name, $filePath)
+    public function createFile($name, $filePath, $mime = 'application/json')
     {
         $params = [
-            'file' => new \CURLFile($filePath, 'application/json', $name),
+            'file' => new \CURLFile($filePath, $mime, $name),
             'name' => $name,
         ];
         $this->request = $this->builder()
@@ -312,6 +313,47 @@ class WtiApi
             ->setParams($params)
             ->setJsonEncodeParams(false)
             ->setEndpoint('files')
+            ->build();
+        $this->request->run();
+        return $this->request->getRawResult();
+    }
+
+    /**
+     * @param $masterFileId
+     * @param $localeCode
+     * @param $name
+     * @param $filePath
+     * @param bool $merge
+     * @param bool $ignoreMissing
+     * @param bool $minorChanges
+     * @param null $label
+     * @param string $mime
+     * @return mixed
+     */
+    public function updateFile(
+        $masterFileId,
+        $localeCode,
+        $name,
+        $filePath,
+        $merge = false,
+        $ignoreMissing = false,
+        $minorChanges = false,
+        $label = null,
+        $mime = 'application/json'
+    ) {
+        $params = [
+            'name' => $name,
+            'merge' => $merge,
+            'ignore_missing' => $ignoreMissing,
+            'minor_changes' => $minorChanges,
+            'label' => $label,
+            'file' => new \CURLFile($filePath, $mime, $name)
+        ];
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::PUT)
+            ->setParams($params)
+            ->setJsonEncodeParams(false)
+            ->setEndpoint("files/{$masterFileId}/locales/{$localeCode}")
             ->build();
         $this->request->run();
         return $this->request->getRawResult();
@@ -375,7 +417,7 @@ class WtiApi
      * @param array $params
      * @return mixed|null
      */
-    public function updateMembership($membershipId, array $params)
+    public function updateMembership($membershipId, array $params = [])
     {
         $this->request = $this->builder()
             ->setMethod(RequestMethod::PUT)
@@ -396,37 +438,6 @@ class WtiApi
             ->setMethod(RequestMethod::DELETE)
             ->setEndpoint('files/' . $fileId)
             ->setJsonEncodeParams(false)
-            ->build();
-        $this->request->run();
-        return $this->request->getRawResult();
-    }
-
-    /**
-     * @param $masterId
-     * @param $localeCode
-     * @param $name
-     * @param $filePath
-     * @param bool $merge
-     * @param bool $ignoreMissing
-     * @param bool $minorChanges
-     * @param null $label
-     * @return mixed
-     */
-    public function updateFile($masterId, $localeCode, $name, $filePath, $merge = false, $ignoreMissing = false, $minorChanges = false, $label = null)
-    {
-        $params = [
-            'name' => $name,
-            'merge' => $merge,
-            'ignore_missing' => $ignoreMissing,
-            'minor_changes' => $minorChanges,
-            'label' => $label,
-            'file' => new \CURLFile($filePath, 'application/json', $name)
-        ];
-        $this->request = $this->builder()
-            ->setMethod(RequestMethod::PUT)
-            ->setParams($params)
-            ->setJsonEncodeParams(false)
-            ->setEndpoint("files/{$masterId}/locales/{$localeCode}")
             ->build();
         $this->request->run();
         return $this->request->getRawResult();
@@ -454,8 +465,6 @@ class WtiApi
      * @param $invitationId
      * @param array $params
      * @return bool|mixed
-     *
-     * @url https://webtranslateit.com/en/docs/api/user#approve-invitation
      */
     public function approveInvitation($invitationId, $params = [])
     {
@@ -469,16 +478,14 @@ class WtiApi
     }
 
     /**
-     * @param $invitation_id
+     * @param $invitationId
      * @return bool|mixed
-     *
-     * @url https://webtranslateit.com/en/docs/api/user#remove-invitation
      */
-    public function removeInvitation($invitation_id)
+    public function removeInvitation($invitationId)
     {
         $this->request = $this->builder()
             ->setMethod(RequestMethod::DELETE)
-            ->setEndpoint('users/' . $invitation_id)
+            ->setEndpoint('users/' . $invitationId)
             ->build();
         $this->request->run();
         return $this->request->getResult();
