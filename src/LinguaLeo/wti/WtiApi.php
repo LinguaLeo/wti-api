@@ -122,7 +122,15 @@ class WtiApi
     public function getStringId($key, $fileId)
     {
         $result = $this->getStringsByKey($key, $fileId);
-        return $result ? $result[0]->id : null;
+        if (!$result) {
+            return null;
+        }
+        foreach ($result as $string) {
+            if ($string->key == $key) {
+                return $string->id;
+            }
+        }
+        return null;
     }
 
     /**
