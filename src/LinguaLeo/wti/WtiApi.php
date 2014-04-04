@@ -88,6 +88,21 @@ class WtiApi
     }
 
     /**
+     * @param $filename
+     * @return int|null
+     */
+    public function getFileIdByName($filename)
+    {
+        $info = $this->getProjectInfo();
+        foreach ($info->project_files as $file) {
+            if ($file->name == $filename) {
+                return $file->id;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @param $key
      * @param $fileId
      * @return mixed|null
