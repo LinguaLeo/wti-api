@@ -515,6 +515,20 @@ class WtiApi
     }
 
     /**
+     * @param $userId
+     * @return bool|mixed
+     */
+    public function removeMembership($userId)
+    {
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::DELETE)
+            ->setEndpoint('memberships/' . $userId)
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
+    }
+
+    /**
      * @return mixed
      */
     public function getLastError()
