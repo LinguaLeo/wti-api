@@ -119,6 +119,11 @@ class WtiApi
         } else {
             $params['filters']['file_name'] = $fileId;
         }
+
+        return $this->listStrings($params);
+    }
+
+    public function listStrings($params = null) {
         $this->request = $this->builder()
             ->setMethod(RequestMethod::GET)
             ->setEndpoint('strings')
@@ -127,6 +132,22 @@ class WtiApi
         $this->request->run();
         $result = $this->request->getResult();
         return $result ? $result : [];
+    }
+
+    /**
+     * Get translation for stringId and locale
+     *
+     * @param $stringId
+     * @param $localeCode
+     * @return mixed|null
+     */
+    public function getTranslation ($stringId, $localeCode) {
+        $this->request = $this->builder()
+            ->setMethod(RequestMethod::GET)
+            ->setEndpoint('strings/' . $stringId . '/locales/' . $localeCode . '/translations')
+            ->build();
+        $this->request->run();
+        return $this->request->getResult();
     }
 
     /**
