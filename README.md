@@ -3,6 +3,8 @@ PHP API for WebtranslateIt.com service
 
 Installation:
 
+You can install this library using composer. Check https://packagist.org/packages/lingualeo/wti-api for instructions.
+
 Usage:
 ```php
 $apiKey = 'YOUR_API_KEY';
