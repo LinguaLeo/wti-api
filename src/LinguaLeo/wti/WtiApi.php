@@ -123,15 +123,35 @@ class WtiApi
         return $this->listStrings($params);
     }
 
-    public function listStrings($params = null) {
+    public function listStrings($params = null, $page = 1)
+    {
+        if ($params == null) {
+            $params = [];
+        }
+        $params['page'] = intval($page);
         $this->request = $this->builder()
             ->setMethod(RequestMethod::GET)
             ->setEndpoint('strings')
             ->setParams($params)
             ->build();
         $this->request->run();
-        $result = $this->request->getResult();
-        return $result ? $result : [];
+        $requestResult = $this->request->getResult();
+        $result = $requestResult ? $requestResult : [];
+
+        if (count($result) && $this->isRequestHasNextPage()) {
+            $result += $this->listStrings($params, ++$page);
+        }
+
+        return $result;
+    }
+
+    private function isRequestHasNextPage()
+    {
+        $responseHeaders = $this->request->getHeaders();
+        if (isset($responseHeaders['Link'])) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -141,7 +161,8 @@ class WtiApi
      * @param $localeCode
      * @return mixed|null
      */
-    public function getTranslation ($stringId, $localeCode) {
+    public function getTranslation($stringId, $localeCode)
+    {
         $this->request = $this->builder()
             ->setMethod(RequestMethod::GET)
             ->setEndpoint('strings/' . $stringId . '/locales/' . $localeCode . '/translations')
@@ -384,7 +405,8 @@ class WtiApi
         $minorChanges = false,
         $label = null,
         $mime = 'application/json'
-    ) {
+    )
+    {
         $params = [
             'name' => $name,
             'merge' => $merge,

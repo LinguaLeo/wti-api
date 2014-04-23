@@ -60,6 +60,7 @@ class WtiRequestBuilder
         }
         curl_setopt($this->resource, CURLOPT_URL, $this->buildRequestUrl());
         curl_setopt($this->resource, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->resource, CURLOPT_HEADER, 1);
         curl_setopt($this->resource, CURLOPT_CUSTOMREQUEST, $this->method);
         if ($this->jsonEncodeParams) {
             curl_setopt($this->resource, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
