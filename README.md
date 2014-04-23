@@ -27,3 +27,38 @@ $strings = $api->getStringsByKey('someKey', 'FILE_ID');
 // https://webtranslateit.com/en/docs/api/stats/#top-translators
 $topTranslators = $api->getTopTranslators();
 ```
+
+All implemented methods:
+<pre>
+getProjectInfo()
+
+getProjectStatistics([$params])
+getTopTranslators([$params])
+
+addLocale($localeCode)
+deleteLocale($localeCode)
+
+getTranslation($stringId, $localeCode)
+getStringsByKey($key, $fileId)
+listStrings([$params, $page])
+getStringId($key, $fileId)
+addString($key, $value, $file[, $label, $locale, $type])
+deleteString($stringId)
+addTranslate($stringId, $locale, $value[, $status])
+updateStringLabel($stringId, $label)
+
+createFile($name, $filePath[, $mime])
+updateFile($masterFileId, $localeCode, $name, $filePath[, $merge, $ignoreMissing, $minorChanges, $label, $mime])
+createEmptyFile($filename[, $ext])
+loadFile($fileId, $locale)
+isMasterFileExists($masterFileId)
+getFileIdByName($filename)
+
+addUser($email, $locale, $proofread[, $role])
+updateMembership($membershipId[, $params])
+deleteFile($fileId)
+listUsers([$params])
+approveInvitation($invitationId[, $params])
+removeInvitation($invitationId)
+removeMembership($userId)
+</pre>
