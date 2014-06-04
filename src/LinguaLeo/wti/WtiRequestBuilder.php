@@ -57,7 +57,11 @@ class WtiRequestBuilder
             $params = $this->jsonEncodeParams ? json_encode($this->params) : $this->params;
             curl_setopt($this->resource, CURLOPT_POST, true);
             curl_setopt($this->resource, CURLOPT_POSTFIELDS, $params);
+        } else {
+            curl_setopt($this->resource, CURLOPT_POST, false);
+            curl_setopt($this->resource, CURLOPT_POSTFIELDS, []);
         }
+
         curl_setopt($this->resource, CURLOPT_URL, $this->buildRequestUrl());
         curl_setopt($this->resource, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->resource, CURLOPT_HEADER, 1);
