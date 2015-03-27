@@ -288,6 +288,30 @@ class WtiApi
      */
     public function addString($key, $value, $file, $label = null, $locale = null, $type = Type::TYPE_STRING)
     {
+        $translations = [];
+
+        if ($value) {
+            $locale = $locale ? $locale : $this->getProjectInfo()->source_locale->code;
+            $translations = [
+                [
+                    'locale' => $locale,
+                    'text' => $value
+                ]
+            ];
+        }
+        return $this->addStringWithTranslations($key, $file, $translations, $label, $type);
+    }
+
+    /**
+     * @param string $key
+     * @param string $file can be name of file or it's unique id
+     * @param string $label
+     * @param array $translations [ [locale, text, status] ]
+     * @param string $type
+     * @return bool|mixed|null
+     */
+    public function addStringWithTranslations($key, $file, $translations, $label = null, $type = Type::TYPE_STRING)
+    {
         $params = [
             'key' => $key,
             'type' => $type,
@@ -303,15 +327,7 @@ class WtiApi
                 'file_name' => $file
             ];
         }
-        if ($value) {
-            $locale = $locale ? $locale : $this->getProjectInfo()->source_locale->code;
-            $params['translations'] = [
-                [
-                    'locale' => $locale,
-                    'text' => $value
-                ]
-            ];
-        }
+        $params['translations'] = $translations;
         $this->request = $this->builder()
             ->setMethod(RequestMethod::POST)
             ->setEndpoint('strings')
