@@ -462,9 +462,10 @@ class WtiApi
     /**
      * @param $fileId
      * @param $locale
+     * @param $raw
      * @return mixed|null
      */
-    public function loadFile($fileId, $locale)
+    public function loadFile($fileId, $locale, $raw = false)
     {
         $this->request = $this->builder()
             ->setMethod(RequestMethod::GET)
@@ -472,6 +473,11 @@ class WtiApi
             ->setIsJsonToEndpointAdded(false)
             ->build();
         $this->request->run();
+
+        if ($raw) {
+            return $this->request->getRawResult();
+        }
+
         return $this->request->getResult(true);
     }
 
